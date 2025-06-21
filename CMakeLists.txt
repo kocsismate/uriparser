@@ -146,6 +146,8 @@ set(API_HEADER_FILES
 set(LIBRARY_CODE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCommon.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCommon.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCopy.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCopy.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCompare.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriEscape.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriFile.c
@@ -157,6 +159,7 @@ set(LIBRARY_CODE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriNormalizeBase.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriNormalizeBase.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriNormalize.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriNormalize.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriParseBase.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriParseBase.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriParse.c

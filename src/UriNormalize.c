@@ -71,7 +71,6 @@
 # include <uriparser/Uri.h>
 # include "UriNormalizeBase.h"
 # include "UriCommon.h"
-# include "UriCopy.h"
 # include "UriMemory.h"
 #endif
 
