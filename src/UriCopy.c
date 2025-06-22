@@ -165,48 +165,44 @@ int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
 
 	doneMask |= URI_NORMALIZE_PORT;
 
+	destUri->pathHead = NULL;
+	destUri->pathTail = NULL;
+
 	if (sourceUri->pathHead != NULL) {
-		destUri->pathHead = memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
-		if (destUri->pathHead == NULL) {
-			URI_FUNC(PreventLeakageAfterCopy)(destUri, doneMask, memory);
-			return URI_ERROR_MALLOC;
-		}
+		URI_TYPE(PathSegment) * sourceWalker = sourceUri->pathHead;
+		URI_TYPE(PathSegment) * destPrev = NULL;
 
-		if (URI_FUNC(CopyRangeAsNeeded)(&destUri->pathHead->text, &sourceUri->pathHead->text, URI_TRUE, memory) == URI_FALSE) {
-			URI_FUNC(PreventLeakageAfterCopy)(destUri, doneMask, memory);
-			memory->free(memory, destUri->pathHead);
-			return URI_ERROR_MALLOC;
-		}
-		destUri->pathHead->next = NULL;
-		destUri->pathHead->reserved = NULL;
-
-		doneMask |= URI_NORMALIZE_PATH;
-
-		{
-			URI_TYPE(PathSegment) * sourceWalker = sourceUri->pathHead->next;
-			URI_TYPE(PathSegment) * destWalker = destUri->pathHead;
-
-			while (sourceWalker != NULL && (sourceWalker->text.first != sourceWalker->text.afterLast || sourceWalker->text.first == URI_FUNC(SafeToPointTo))) {
-				destWalker->next = memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
-				if (destWalker->next == NULL) {
-					URI_FUNC(PreventLeakageAfterCopy)(destUri, doneMask, memory);
-					return URI_ERROR_MALLOC;
-				}
-
-				destWalker = destWalker->next;
-				if (URI_FUNC(CopyRangeAsNeeded)(&destWalker->text, &sourceWalker->text, URI_TRUE, memory) == URI_FALSE) {
-					URI_FUNC(PreventLeakageAfterCopy)(destUri, doneMask, memory);
-					return URI_ERROR_MALLOC;
-				}
-				destWalker->reserved = NULL;
-				sourceWalker = sourceWalker->next;
+		while (sourceWalker != NULL) {
+			URI_TYPE(PathSegment) * destWalker = memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
+			if (destWalker == NULL) {
+				URI_FUNC(PreventLeakageAfterCopy)(destUri, doneMask, memory);
+				return URI_ERROR_MALLOC;
 			}
+
+			destWalker->text.first = NULL;
+			destWalker->text.afterLast = NULL;
 			destWalker->next = NULL;
-			destUri->pathTail = destWalker;
+			destWalker->reserved = NULL;
+
+			if (destUri->pathHead == NULL) {
+				destUri->pathHead = destWalker;
+				doneMask |= URI_NORMALIZE_PATH;
+			}
+
+			if (URI_FUNC(CopyRangeAsNeeded)(&destWalker->text, &sourceWalker->text, URI_TRUE, memory) == URI_FALSE) {
+				URI_FUNC(PreventLeakageAfterCopy)(destUri, doneMask, memory);
+				return URI_ERROR_MALLOC;
+			}
+
+			if (destPrev != NULL) {
+				destPrev->next = destWalker;
+			}
+
+			destPrev = destWalker;
+			sourceWalker = sourceWalker->next;
+
+			destUri->pathTail = destPrev;
 		}
-	} else {
-		destUri->pathHead = NULL;
-		destUri->pathTail = NULL;
 	}
 
 	if (URI_FUNC(CopyRangeAsNeeded)(&destUri->query, &sourceUri->query, URI_FALSE, memory) == URI_FALSE) {
