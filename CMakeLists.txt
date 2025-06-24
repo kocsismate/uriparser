@@ -146,9 +146,9 @@ set(API_HEADER_FILES
 set(LIBRARY_CODE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCommon.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCommon.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCompare.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCopy.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCopy.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCompare.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriEscape.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriFile.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriIp4Base.c
