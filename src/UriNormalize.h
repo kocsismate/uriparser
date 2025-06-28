@@ -38,8 +38,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if (defined(URI_PASS_ANSI) && !defined(URI_COPY_H_ANSI)) \
-	|| (defined(URI_PASS_UNICODE) && !defined(URI_COPY_H_UNICODE)) \
+#if (defined(URI_PASS_ANSI) && !defined(URI_NORMALIZE_H_ANSI)) \
+	|| (defined(URI_PASS_UNICODE) && !defined(URI_NORMALIZE_H_ANSI)) \
 	|| (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* What encodings are enabled? */
 #include <uriparser/UriDefsConfig.h>

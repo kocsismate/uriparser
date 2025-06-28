@@ -286,6 +286,7 @@ if(URIPARSER_BUILD_TESTS)
     find_package(GTest 1.8.0 REQUIRED)
 
     add_executable(testrunner
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/copy.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/test/FourSuite.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/test/MemoryManagerSuite.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp

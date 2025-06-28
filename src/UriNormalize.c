@@ -149,6 +149,8 @@ void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
 		}
 	}
 
+	/* NOTE: Port cannot happen! */
+
 	if (revertMask & URI_NORMALIZE_PATH) {
 		URI_TYPE(PathSegment) * walker = uri->pathHead;
 		while (walker != NULL) {
