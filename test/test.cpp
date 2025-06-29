@@ -2445,45 +2445,6 @@ TEST(ParseIpFourAddressSuite, FourSaneOctets) {
 	EXPECT_EQ(octetOutput[3], 40);
 }
 
-namespace {
-	void testCopyUri(const char *const sourceUriString) {
-		UriParserStateA state;
-		UriUriA sourceUri;
-		state.uri = &sourceUri;
-
-		int result = uriParseUriA(&state, sourceUriString);
-		if (result != URI_SUCCESS) {
-			ASSERT_TRUE(false);
-		}
-
-		UriUriA destUri;
-		if (uriCopyUriA(&destUri, &sourceUri) != URI_SUCCESS) {
-			uriFreeUriMembersA(&sourceUri);
-			ASSERT_TRUE(false);
-		}
-
-		ASSERT_TRUE(URI_TRUE == uriEqualsUriA(&destUri, &sourceUri));
-
-		uriFreeUriMembersA(&sourceUri);
-		uriFreeUriMembersA(&destUri);
-	}
-} // namespace
-
-TEST(CopySuite, CopyIncompleteUri) {
-	testCopyUri("https://somehost.com");
-}
-
-TEST(CopySuite, CopyCompleteUri) {
-	testCopyUri("https://user:pass@somehost.com:80/path?query#frag");
-}
-
-TEST(CopySuite, CopyRelativeReference) {
-	testCopyUri("/foo/bar/baz");
-}
-
-TEST(CopySuite, CopyEmail) {
-	testCopyUri("mailto:fred@example.com");
-}
 
 int main(int argc, char ** argv) {
 	::testing::InitGoogleTest(&argc, argv);

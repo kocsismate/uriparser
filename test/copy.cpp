@@ -32,21 +32,16 @@
 using namespace std;
 
 namespace {
-	void testCopyUri(const char *const sourceUriString) {
-		UriParserStateA state;
+	void testCopyUri(UriUriA * destUri, const char *const sourceUriString) {
 		UriUriA sourceUri;
-		state.uri = &sourceUri;
 
-		int result = uriParseSingleUriExA(&state, sourceUriString, sourceUriString + strlen(sourceUriString), NULL);
+		int result = uriParseSingleUriExA(&sourceUri, sourceUriString, sourceUriString + strlen(sourceUriString), NULL);
 		ASSERT_EQ(URI_SUCCESS, result);
 
-		UriUriA destUri;
-		ASSERT_EQ(URI_SUCCESS, uriCopyUriA(&destUri, &sourceUri));
-		ASSERT_EQ(URI_TRUE, uriEqualsUriA(&destUri, &sourceUri));
+		ASSERT_EQ(URI_SUCCESS, uriCopyUriA(destUri, &sourceUri));
+		ASSERT_EQ(URI_TRUE, uriEqualsUriA(destUri, &sourceUri));
 
 		uriFreeUriMembersA(&sourceUri);
-
-		return destUri;
 	}
 } // namespace
 
@@ -57,114 +52,116 @@ TEST(CopyUriSuite, ErrorUriNull) {
 }
 
 TEST(CopyUriSuite, ErrorDestUriNull) {
-	UriParserStateA state;
 	UriUriA sourceUri;
-	state.uri = &sourceUri;
 	const char * const sourceUriString = "https://example.com";
 
-	int result = uriParseSingleUriExA(&state, sourceUriString, sourceUriString + strlen(sourceUriString), NULL);
+	int result = uriParseSingleUriExA(&sourceUri, sourceUriString, sourceUriString + strlen(sourceUriString), NULL);
 	ASSERT_EQ(URI_SUCCESS, result);
 
-	UriUriA destUri;
 	ASSERT_EQ(URI_ERROR_NULL, uriCopyUriA(NULL, &sourceUri));
 
 	uriFreeUriMembersA(&sourceUri);
 }
 
 TEST(CopyUriSuite, ErrorIncompleteMemoryManager) {
-	UriParserStateA state;
 	UriUriA sourceUri;
-	state.uri = &sourceUri;
 	const char * const sourceUriString = "https://example.com";
-	UriMemoryManager memory;
+	UriMemoryManager memory = {NULL, NULL, NULL, NULL, NULL, NULL};
 
-	int result = uriParseSingleUriExA(&state, sourceUriString, sourceUriString + strlen(sourceUriString), NULL);
+	int result = uriParseSingleUriExA(&sourceUri, sourceUriString, sourceUriString + strlen(sourceUriString), NULL);
 	ASSERT_EQ(URI_SUCCESS, result);
 
 	UriUriA destUri;
-	ASSERT_EQ(URI_ERROR_MEMORY_MANAGER_INCOMPLETE, uriCopyUriMmA(NULL, &sourceUri, &memory));
+	ASSERT_EQ(URI_ERROR_MEMORY_MANAGER_INCOMPLETE, uriCopyUriMmA(&destUri, &sourceUri, &memory));
 
 	uriFreeUriMembersA(&sourceUri);
 }
 
 TEST(CopyUriSuite, Success) {
-	uriUriA * destUri = testCopyUri("https://somehost.com");
+	UriUriA destUri;
+	testCopyUri(&destUri, "https://somehost.com");
 
-	ASSERT_TRUE(destUri->hostData->ipv4 == NULL);
-	ASSERT_TRUE(destUri->hostData->ipv6 == NULL);
-	ASSERT_EQ(0, strncmp(destUri->hostData->ipFuture.first, 7);
-	ASSERT_TRUE(destUri->hostData->ipFuture.afterLast == NULL);
+	ASSERT_TRUE(destUri.hostData.ip4 == NULL);
+	ASSERT_TRUE(destUri.hostData.ip6 == NULL);
+	ASSERT_TRUE(destUri.hostData.ipFuture.first == NULL);
+	ASSERT_TRUE(destUri.hostData.ipFuture.afterLast == NULL);
 
 	uriFreeUriMembersA(&destUri);
 }
 
 TEST(CopyUriSuite, SuccessCompleteUri) {
-	uriUriA * destUri = testCopyUri("https://user:pass@somehost.com:80/path?query#frag");
+	UriUriA destUri;
+	testCopyUri(&destUri, "https://user:pass@somehost.com:80/path?query#frag");
 
 	uriFreeUriMembersA(&destUri);
 }
 
 TEST(CopyUriSuite, SuccessRelativeReference) {
-	uriUriA * destUri = testCopyUri("/foo/bar/baz");
+	UriUriA destUri;
+	testCopyUri(&destUri, "/foo/bar/baz");
 
 	uriFreeUriMembersA(&destUri);
 }
 
 TEST(CopyUriSuite, SucessEmail) {
-	uriUriA * destUri = testCopyUri("mailto:fred@example.com");
+	UriUriA destUri;
+	testCopyUri(&destUri, "mailto:fred@example.com");
 
 	uriFreeUriMembersA(&destUri);
 }
 
-TEST(CopyUriSuite, SuccessIpv4) {
-	uriUriA * destUri = testCopyUri("http://192.168.0.1/");
+TEST(CopyUriSuite, SuccessIpV4) {
+	UriUriA destUri;
+	testCopyUri(&destUri, "http://192.168.0.1/");
 
-	ASSERT_EQ(192, destUri->hostData->ipv4.data[0]);
-	ASSERT_EQ(168, destUri->hostData->ipv4.data[1]);
-	ASSERT_EQ(0, destUri->hostData->ipv4.data[2]);
-	ASSERT_EQ(1, destUri->hostData->ipv4.data[3]);
+	ASSERT_EQ(192, destUri.hostData.ip4->data[0]);
+	ASSERT_EQ(168, destUri.hostData.ip4->data[1]);
+	ASSERT_EQ(0, destUri.hostData.ip4->data[2]);
+	ASSERT_EQ(1, destUri.hostData.ip4->data[3]);
 
-	ASSERT_TRUE(destUri->hostData->ipv6 == NULL);
-	ASSERT_TRUE(destUri->hostData->ipFuture.first == NULL);
-	ASSERT_TRUE(destUri->hostData->ipFuture.afterLast == NULL);
+	ASSERT_TRUE(destUri.hostData.ip6 == NULL);
+	ASSERT_TRUE(destUri.hostData.ipFuture.first == NULL);
+	ASSERT_TRUE(destUri.hostData.ipFuture.afterLast == NULL);
 
 	uriFreeUriMembersA(&destUri);
 }
 
-TEST(CopyUriSuite, SuccessIpv6) {
-	uriUriA * destUri = testCopyUri("https://[2001:0db8:0001:0000:0000:0ab9:C0A8:0102]");
+TEST(CopyUriSuite, SuccessIpV6) {
+	UriUriA destUri;
+	testCopyUri(&destUri, "https://[2001:0db8:0001:0000:0000:0ab9:C0A8:0102]");
 
-	ASSERT_EQ(32, destUri->hostData->ipv6[0]);
-	ASSERT_EQ(1, destUri->hostData->ipv6[1]);
-	ASSERT_EQ(13, destUri->hostData->ipv6[2]);
-	ASSERT_EQ(184, destUri->hostData->ipv6[3]);
-	ASSERT_EQ(0, destUri->hostData->ipv6[4]);
-	ASSERT_EQ(1, destUri->hostData->ipv6[5]);
-	ASSERT_EQ(0, destUri->hostData->ipv6[6]);
-	ASSERT_EQ(0, destUri->hostData->ipv6[7]);
-	ASSERT_EQ(0, destUri->hostData->ipv6[8]);
-	ASSERT_EQ(0, destUri->hostData->ipv6[9]);
-	ASSERT_EQ(10, destUri->hostData->ipv6[10]);
-	ASSERT_EQ(185, destUri->hostData->ipv6[11]);
-	ASSERT_EQ(192, destUri->hostData->ipv6[12]);
-	ASSERT_EQ(168, destUri->hostData->ipv6[13]);
-	ASSERT_EQ(1, destUri->hostData->ipv6[14]);
-	ASSERT_EQ(2, destUri->hostData->ipv6[15]);
+	ASSERT_EQ(32, destUri.hostData.ip6->data[0]);
+	ASSERT_EQ(1, destUri.hostData.ip6->data[1]);
+	ASSERT_EQ(13, destUri.hostData.ip6->data[2]);
+	ASSERT_EQ(184, destUri.hostData.ip6->data[3]);
+	ASSERT_EQ(0, destUri.hostData.ip6->data[4]);
+	ASSERT_EQ(1, destUri.hostData.ip6->data[5]);
+	ASSERT_EQ(0, destUri.hostData.ip6->data[6]);
+	ASSERT_EQ(0, destUri.hostData.ip6->data[7]);
+	ASSERT_EQ(0, destUri.hostData.ip6->data[8]);
+	ASSERT_EQ(0, destUri.hostData.ip6->data[9]);
+	ASSERT_EQ(10, destUri.hostData.ip6->data[10]);
+	ASSERT_EQ(185, destUri.hostData.ip6->data[11]);
+	ASSERT_EQ(192, destUri.hostData.ip6->data[12]);
+	ASSERT_EQ(168, destUri.hostData.ip6->data[13]);
+	ASSERT_EQ(1, destUri.hostData.ip6->data[14]);
+	ASSERT_EQ(2, destUri.hostData.ip6->data[15]);
 
-	ASSERT_TRUE(destUri->hostData->ipv4 == NULL);
-	ASSERT_TRUE(destUri->hostData->ipFuture.first == NULL);
-	ASSERT_TRUE(destUri->hostData->ipFuture.afterLast == NULL);
+	ASSERT_TRUE(destUri.hostData.ip4 == NULL);
+	ASSERT_TRUE(destUri.hostData.ipFuture.first == NULL);
+	ASSERT_TRUE(destUri.hostData.ipFuture.afterLast == NULL);
 
 	uriFreeUriMembersA(&destUri);
 }
 
 TEST(CopyUriSuite, SuccessIpFuture) {
-	uriUriA * destUri = testCopyUri("//[v7.host]/source");
+	UriUriA destUri;
+	testCopyUri(&destUri, "//[v7.host]/source");
 
-	ASSERT_EQ(0, strncmp(destUri->hostData->ipFuture.first, "v7.host", 7);
+	ASSERT_EQ(0, strncmp(destUri.hostData.ipFuture.first, "v7.host", 7));
 
-	ASSERT_TRUE(destUri->hostData->ipv4 == NULL);
-	ASSERT_TRUE(destUri->hostData->ipv6 == NULL);
+	ASSERT_TRUE(destUri.hostData.ip4 == NULL);
+	ASSERT_TRUE(destUri.hostData.ip6 == NULL);
 
 	uriFreeUriMembersA(&destUri);
 }

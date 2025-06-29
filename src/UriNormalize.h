@@ -39,7 +39,7 @@
  */
 
 #if (defined(URI_PASS_ANSI) && !defined(URI_NORMALIZE_H_ANSI)) \
-	|| (defined(URI_PASS_UNICODE) && !defined(URI_NORMALIZE_H_ANSI)) \
+	|| (defined(URI_PASS_UNICODE) && !defined(URI_NORMALIZE_H_UNICODE)) \
 	|| (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* What encodings are enabled? */
 #include <uriparser/UriDefsConfig.h>
